@@ -12,13 +12,24 @@ class MoviesController < ApplicationController
     if params.key?(:sort)
       @hilite = sort = params[:sort]
       @movies = Movie.order(sort)
+      session[:sort] = params[:sort]
+    elsif session.key?(:sort)
+      params[:sort] = session[:sort]
+      redirect_to movies_path(params) and return
     end
+    @hilite = sort = params[:sort]
     @all_ratings = Movie.ratings
     @checked_ratings = @all_ratings
     if params.key?(:ratings)
       @checked_ratings = (params[:ratings].keys if params.key?(:ratings))
       @movies = Movie.where(rating: @checked_ratings)
+      session[:ratings] = params[:ratings]
+    elsif session.key?(:ratings)
+      params[:ratings] = session[:ratings]
+      redirect_to movies_path(params) and return
     end
+    @checked_ratings = (params[:ratings].keys if params.key?(:ratings)) || @all_ratings
+    @movies = Movie.order(sort).where(rating: @checked_ratings)
   end
 
   def new
